@@ -1,1 +1,8 @@
 
+
+
+mkdir testdir新建目录
+cp test.txt testdir/复制
+mv test.txt newtest.txt移动 重命名
+rm newtest.txt删除文件
+chmod +x newtest.txt给权限
