@@ -1,4 +1,4 @@
-用 g++ 在终端编译运行 Hello World
+# 用 g++ 在终端编译运行 Hello World
 
 <img width="323" height="119" alt="image" src="https://github.com/user-attachments/assets/a2f37586-2ddc-4542-b249-ec6883aa1011" />
 
