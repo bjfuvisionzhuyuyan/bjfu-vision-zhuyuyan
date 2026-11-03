@@ -6,10 +6,10 @@
 
 # 成绩统计程序
 <img width="2545" height="1541" alt="391a79c871ed84b64f8bc5102455783c" src="https://github.com/user-attachments/assets/071fb09d-b371-433e-a0f6-fd080aab915c" />
-预处理：g++ -E score.cpp -o score.i（把头文件展开）
-汇编，生成汇编文件：g++ -S score.i -o score.s(比c++更低级的语言）
-把汇编文件转化为机器码文件（二进制格式）：g++ -c score.s -o score.o
-链接：g++ score.o -o score
+预处理：g++ -E score.cpp -o score.i（把头文件展开）                     
+汇编，生成汇编文件：g++ -S score.i -o score.s(比c++更低级的语言）                         
+把汇编文件转化为机器码文件（二进制格式）：g++ -c score.s -o score.o                  
+链接：g++ score.o -o score                    
 输入路径,终端中执行：./score
 
 # 三个swap函数
