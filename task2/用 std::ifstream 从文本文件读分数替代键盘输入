@@ -1,0 +1,49 @@
+#include <iostream>
+#include <fstream>   // std::ifstream —— 从文件读数据
+#include <vector>
+#include <algorithm>
+#include <numeric>
+
+int main() {
+    // 用 std::ifstream 打开文本文件，替代键盘输入（std::cin）
+    std::ifstream fin("scores.txt");
+    if (!fin) {
+        std::cerr << "错误：无法打开 scores.txt" << std::endl;
+        return 1;
+    }
+
+    // 从文件里逐个读入分数，存入 vector
+    std::vector<double> scores;
+    double s;
+    while (fin >> s) {
+        scores.push_back(s);
+    }
+
+    if (scores.empty()) {
+        std::cerr << "错误：文件里没有读到有效分数" << std::endl;
+        return 1;
+    }
+
+    // 统计：最大值、最小值、平均值
+    double maxv = *std::max_element(scores.begin(), scores.end());
+    double minv = *std::min_element(scores.begin(), scores.end());
+    double avg  = std::accumulate(scores.begin(), scores.end(), 0.0) / scores.size();
+
+    // 从高到低排序
+    std::vector<double> sorted(scores);
+    std::sort(sorted.begin(), sorted.end(), std::greater<double>());
+
+    // 输出结果
+    std::cout << "共读取 " << scores.size() << " 个分数" << std::endl;
+    std::cout << "最大值: " << maxv << std::endl;
+    std::cout << "最小值: " << minv << std::endl;
+    std::cout << "平均值: " << avg << std::endl;
+
+    std::cout << "从高到低: ";
+    for (double v : sorted) {
+        std::cout << v << ' ';
+    }
+    std::cout << std::endl;
+
+    return 0;
+}
