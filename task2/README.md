@@ -28,3 +28,6 @@ CMakeList编写
 2. 传指针：通过地址间接修改原变量
 3. 传引用：a、b 就是原变量的别名，直接修改
 <img width="2545" height="1541" alt="4aa2d1a6dc0e7b632781c33ba85440b9" src="https://github.com/user-attachments/assets/b5b1e229-7007-4e99-afce-a770d1cd652b" />
+
+# 在 VS Code 里打断点单步调试一次
+<img width="632" height="766" alt="image" src="https://github.com/user-attachments/assets/dd70b315-cb0e-4aac-aefc-1184f1ba03e1" />
