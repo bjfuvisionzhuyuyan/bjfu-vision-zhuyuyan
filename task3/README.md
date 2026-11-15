@@ -15,4 +15,4 @@
 
 <img width="515" height="240" alt="image" src="https://github.com/user-attachments/assets/0b81fb22-769f-4329-85cf-1606d16aba77" />
 
-
+Detector 要设计成抽象基类：红蓝检测的逻辑将来一定会变，而调用它的代码不应该跟着变。抽象基类就是把这个“变化点”隔离出来的手段。
