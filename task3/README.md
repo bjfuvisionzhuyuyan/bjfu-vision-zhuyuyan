@@ -7,7 +7,7 @@
 //解决初始化和示范
 <img width="505" height="604" alt="image" src="https://github.com/user-attachments/assets/06cf969a-1d26-4198-a53a-e57b8bd0db6c" />
 
-## 封装：保证数据安全
+## 封装
 数据（类的属性）+操作这些数据的函数（方法）捆绑在一起，对外只提供受控的接口
 
 黑箱操作，对外只能read提取
