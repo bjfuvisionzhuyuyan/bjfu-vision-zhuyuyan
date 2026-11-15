@@ -1,0 +1,179 @@
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+
+constexpr double kPI = 3.14159265358979323;
+
+// ---------------- 点 ----------------
+struct Point {
+    double x = 0, y = 0;
+};
+Point operator+(const Point& a, const Point& b) { return {a.x + b.x, a.y + b.y}; }
+Point operator*(const Point& a, double k) { return {a.x * k, a.y * k}; }
+double dist(const Point& a, const Point& b) { return std::hypot(a.x - b.x, a.y - b.y); }
+
+enum class Color { RED, BLUE };
+std::string colorName(Color c) { return c == Color::RED ? "红" : "蓝"; }
+
+// ---------------- Light 类（灯条） ----------------
+class Light {
+public:
+    Light(const Point& center, double length, double width, double tilt, Color color)
+        : center_(center), length_(length), width_(width), tilt_(tilt), color_(color) {}
+
+    const Point& center() const { return center_; }
+    double length() const { return length_; }
+    double width() const { return width_; }
+    double tilt() const { return tilt_; }   // 相对竖直方向的倾斜角（度）
+    Color color() const { return color_; }
+
+    // 成员函数：计算长宽比
+    double aspectRatio() const { return length_ / width_; }
+
+    void print(const std::string& tag) const {
+        std::cout << tag << ": 中心(" << center_.x << ", " << center_.y << ") "
+                  << "长" << length_ << " 宽" << width_
+                  << " 长宽比 " << std::fixed << std::setprecision(2) << aspectRatio()
+                  << " 倾斜角 " << tilt_ << "° [" << colorName(color_) << "]\n";
+    }
+
+private:
+    Point center_;
+    double length_;  // 长
+    double width_;   // 宽
+    double tilt_;    // 倾斜角
+    Color color_;
+};
+
+// ---------------- Armor 类（装甲板） ----------------
+class Armor {
+public:
+    Armor(const Light& a, const Light& b)
+        : a_(&a), b_(&b),
+          center_((a.center() + b.center()) * 0.5) {}  // 中心点 = 两灯条中心的中点
+
+    const Point& center() const { return center_; }
+    double angleDiff() const { return std::fabs(a_->tilt() - b_->tilt()); }
+
+    // 两灯条是否平行：倾斜角差小于阈值，且长度接近（比例不超过阈值）
+    bool isParallel(double angleThresh = 8.0, double lenRatioThresh = 1.5) const {
+        if (angleDiff() >= angleThresh) return false;
+        double r = a_->length() / b_->length();
+        if (r < 1) r = 1.0 / r;
+        return r <= lenRatioThresh;
+    }
+
+    void print() const {
+        std::cout << "  装甲板[" << colorName(a_->color()) << "] 中心("
+                  << center_.x << ", " << center_.y << ") 倾角差 "
+                  << angleDiff() << "°  "
+                  << (isParallel() ? "两灯条平行" : "不平行") << '\n';
+    }
+
+private:
+    const Light* a_;
+    const Light* b_;
+    Point center_;
+};
+
+// ---------------- Detector 抽象基类 ----------------
+class Detector {
+public:
+    explicit Detector(std::string name) : name_(std::move(name)) {}
+    virtual ~Detector() = default;
+
+    // 纯虚函数：检测并返回配对成功的装甲板
+    virtual std::vector<Armor> detect(const std::vector<Light>& lights) = 0;
+
+    const std::string& name() const { return name_; }
+
+protected:
+    virtual Color targetColor() const = 0;  // 派生类声明自己识别的颜色
+
+    // 公共配对逻辑：筛选同色灯条，两两组合，满足条件即成装甲板
+    std::vector<Armor> pairUp(const std::vector<Light>& lights) {
+        std::vector<Armor> armors;
+        std::vector<const Light*> cand;
+        for (const auto& l : lights)
+            if (l.color() == targetColor()) cand.push_back(&l);
+
+        std::cout << name_ << "：筛出 " << cand.size()
+                  << " 根目标灯条，两两配对中...\n";
+        for (size_t i = 0; i < cand.size(); ++i) {
+            for (size_t j = i + 1; j < cand.size(); ++j) {
+                Armor armor(*cand[i], *cand[j]);
+                double d = dist(cand[i]->center(), cand[j]->center());
+                // 配对条件：两灯条平行，且中心间距在合理范围 [30, 200] 内
+                if (armor.isParallel() && d > 30 && d < 200)
+                    armors.push_back(armor);
+            }
+        }
+        return armors;
+    }
+
+private:
+    std::string name_;
+};
+
+// ---------------- 红 / 蓝检测器 ----------------
+class RedDetector : public Detector {
+public:
+    RedDetector() : Detector("RedDetector") {}
+    std::vector<Armor> detect(const std::vector<Light>& lights) override {
+        return pairUp(lights);
+    }
+
+protected:
+    Color targetColor() const override { return Color::RED; }
+};
+
+class BlueDetector : public Detector {
+public:
+    BlueDetector() : Detector("BlueDetector") {}
+    std::vector<Armor> detect(const std::vector<Light>& lights) override {
+        return pairUp(lights);
+    }
+
+protected:
+    Color targetColor() const override { return Color::BLUE; }
+};
+
+// ---------------- main：手写假数据测试 ----------------
+int main(int argc, char* argv[]) {
+    std::string mode = (argc > 1) ? argv[1] : "red";
+
+    // 6 个假灯条：4 红 2 蓝，红方两对、蓝方一对
+    std::vector<Light> lights = {
+        {{100, 100}, 25, 5,  2, Color::RED},    // 与 1 号配对
+        {{150, 102}, 24, 5,  3, Color::RED},
+        {{400, 200}, 26, 5, -5, Color::RED},    // 与 3 号配对
+        {{455, 198}, 27, 5, -4, Color::RED},
+        {{700, 150}, 22, 5,  6, Color::BLUE},   // 与 5 号配对
+        {{750, 152}, 23, 5,  7, Color::BLUE},
+    };
+
+    std::cout << "======== 灯条列表 ========\n";
+    for (size_t i = 0; i < lights.size(); ++i)
+        lights[i].print("灯条" + std::to_string(i));
+
+    // 用 unique_ptr 根据参数切换红蓝检测器
+    std::unique_ptr<Detector> detector;
+    if (mode == "red")
+        detector = std::make_unique<RedDetector>();
+    else if (mode == "blue")
+        detector = std::make_unique<BlueDetector>();
+    else {
+        std::cout << "用法: " << argv[0] << " [red|blue]\n";
+        return 1;
+    }
+
+    std::cout << "\n======== 使用 " << detector->name() << " ========\n";
+    std::vector<Armor> armors = detector->detect(lights);
+
+    std::cout << "\n检测到 " << armors.size() << " 块装甲板：\n";
+    for (const auto& a : armors) a.print();
+    return 0;
+}
